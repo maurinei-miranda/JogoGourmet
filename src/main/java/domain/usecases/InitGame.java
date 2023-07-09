@@ -87,9 +87,11 @@ public class InitGame {
 
   }
 
-  //Metodo para falar que venceu
   public static void GotIt() {
-    JOptionPane.showMessageDialog(null, I_GOT_MESSAGE, GAME_TITLE, JOptionPane.PLAIN_MESSAGE);
+    JOptionPane.showMessageDialog(null,
+            I_GOT_MESSAGE,
+            GAME_TITLE,
+            JOptionPane.INFORMATION_MESSAGE);
   }
 
   public static Dish createNewDishPanel(Dish lastDish, List<String> chosenCharacteristics) {
@@ -99,15 +101,12 @@ public class InitGame {
             QUESTION_MESSAGE);
 
     String compareString = String.format(COMPARE_MESSAGE, newDishName, lastDish.getName());
-
     String newCharacteristic = JOptionPane.showInputDialog(null,
             compareString,
             COMPLETE_TITLE,
             QUESTION_MESSAGE);
 
     chosenCharacteristics.add(newCharacteristic);
-
     return new Dish(newDishName, chosenCharacteristics);
   }
-
 }

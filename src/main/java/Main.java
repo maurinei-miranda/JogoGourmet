@@ -1,6 +1,6 @@
 import domain.usecases.InitGame;
 
-public class main {
+public class Main {
 
   public static void main(String[] args) {
     InitGame.startGame();

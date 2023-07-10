@@ -48,10 +48,6 @@ public class InitGame {
         notContainsCharacteristics.add(characteristic);
       }
 
-//      if (notContainsCharacteristics.size() >= 1) {
-//        onlyDistinctCharacteristic.removeAll(notContainsCharacteristics);
-//      }
-
       List<Dish> filteredList = new ArrayList<>(filterDishList(dishes, chosenCharacteristics, notContainsCharacteristics));
       Dish lastDish = filteredList.get(filteredList.size() - 1);
       List<Dish> updatedDishList = dishes.stream().filter(dish1 -> !filteredList.contains(dish1)).toList();

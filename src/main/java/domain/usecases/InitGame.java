@@ -10,6 +10,8 @@ import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_OPTION;
 
 public class InitGame {
+  public InitGame() {
+  }
 
   public static final String GAME_TITLE = "Jogo Gourmet";
   public static final String SURRENDER_TITLE = "Desisto";
@@ -21,80 +23,86 @@ public class InitGame {
   public static final String COMPLETE_TITLE = "Complete";
   public static final String DISH_QUESTION = "O prato que você pensou é %s?";
 
-  public static void startGame() {
-    Dish lasagnaDish = new Dish("Lasanha", List.of("massa"));
-    Dish chocoCakeDish = new Dish("Bolo de Chocolate", new ArrayList<>());
-    List<Dish> initalDish = new ArrayList<>(List.of(lasagnaDish, chocoCakeDish));
-
-    chooseOneCharacteristic(initalDish);
+  public void startGame(List<Dish> initialDish) {
+    chooseOneCharacteristic(initialDish);
   }
 
-  public static void chooseOneCharacteristic(List<Dish> dishes) {
+  private void chooseOneCharacteristic(List<Dish> dishes) {
     JOptionPane.showMessageDialog(null,
             THINK_ABOUT_MESSAGE,
             GAME_TITLE,
             JOptionPane.PLAIN_MESSAGE);
 
-
-    List<String> bruteList = new ArrayList<>();
-    dishes.forEach(dish -> bruteList.addAll(dish.getIsSomething()));
-    List<String> isSomethingList = bruteList.stream().distinct().toList();
+    List<String> onlyDistinctCharacteristic = new ArrayList<>(dishes)
+            .stream().flatMap(dish -> dish.getIsSomething().stream()).distinct().toList();
     List<String> chosenCharacteristics = new ArrayList<>();
+    List<String> notContainsCharacteristics = new ArrayList<>();
 
-    for (int i = 0; i < isSomethingList.size(); i++) {
-      String characteristic = isSomethingList.get(i);
-      String dishCharacteristicQuestion = String.format(DISH_QUESTION, characteristic);
-
-      int dishCharacteristicAnswer = JOptionPane.showConfirmDialog(null,
-              dishCharacteristicQuestion,
-              CONFIRM_TITLE,
-              JOptionPane.YES_NO_OPTION);
-
-      List<Dish> dishList = dishes;
+    for (int i = 0; i < onlyDistinctCharacteristic.size(); i++) {
+      String characteristic = onlyDistinctCharacteristic.get(i);
+      int dishCharacteristicAnswer = panelDishOrCharacteristicQuestion(characteristic);
 
       if (dishCharacteristicAnswer == YES_OPTION) {
         chosenCharacteristics.add(characteristic);
-        dishList = dishList.stream().filter(dish -> dish.getIsSomething().contains(characteristic)).toList();
       } else {
-        dishList = dishList.stream().filter(dish -> !dish.getIsSomething().contains(characteristic)).toList();
+        notContainsCharacteristics.add(characteristic);
       }
 
-      Dish lastDish = dishList.get(dishList.size() - 1);
+//      if (notContainsCharacteristics.size() >= 1) {
+//        onlyDistinctCharacteristic.removeAll(notContainsCharacteristics);
+//      }
 
-      if (dishList.size() == 1) {
-        String questionString = String.format(DISH_QUESTION, lastDish.getName());
-        int isDishQuestion = JOptionPane.showConfirmDialog(null,
-                questionString,
-                CONFIRM_TITLE,
-                JOptionPane.YES_NO_OPTION);
+      List<Dish> filteredList = new ArrayList<>(filterDishList(dishes, chosenCharacteristics, notContainsCharacteristics));
+      Dish lastDish = filteredList.get(filteredList.size() - 1);
+      List<Dish> updatedDishList = dishes.stream().filter(dish1 -> !filteredList.contains(dish1)).toList();
 
-        if (isDishQuestion == YES_OPTION) {
+      if (filteredList.size() == 1) {
+        int isDishAnswer = panelDishOrCharacteristicQuestion(lastDish.getName());
+
+        if (isDishAnswer == YES_OPTION) {
           GotIt();
-          chooseOneCharacteristic(dishes);
+          filteredList.addAll(updatedDishList);
+          chooseOneCharacteristic(filteredList);
         } else {
-          Dish dish = createNewDishPanel(lastDish, chosenCharacteristics);
-          dishes.add(dish);
-          chooseOneCharacteristic(dishes);
-
+          Dish dish = panelCreatesNewDish(lastDish, chosenCharacteristics);
+          filteredList.add(dish);
+          filteredList.addAll(updatedDishList);
+          chooseOneCharacteristic(filteredList);
         }
-      } else if (i == isSomethingList.size() - 1) {
-        Dish newDish = createNewDishPanel(lastDish, chosenCharacteristics);
-        dishes.add(newDish);
-        chooseOneCharacteristic(dishes);
       }
     }
-
-
   }
 
-  public static void GotIt() {
+  private void GotIt() {
     JOptionPane.showMessageDialog(null,
             I_GOT_MESSAGE,
             GAME_TITLE,
             JOptionPane.INFORMATION_MESSAGE);
   }
 
-  public static Dish createNewDishPanel(Dish lastDish, List<String> chosenCharacteristics) {
+  private List<Dish> filterDishList(List<Dish> dishes, List<String> containsCharacteristic, List<String> notContainsCharacteristic) {
+    List<Dish> dishList = new ArrayList<>(dishes);
+    if (containsCharacteristic.size() >= 1) {
+      dishList = dishes.stream().filter(dish -> dish.getIsSomething().containsAll(containsCharacteristic)).toList();
+    }
+    if (notContainsCharacteristic.size() >= 1) {
+      dishList = dishList.stream().filter(dish -> !dish.getIsSomething().containsAll(notContainsCharacteristic)).toList();
+    }
+    return dishList;
+  }
+
+  private int panelDishOrCharacteristicQuestion(String characteristicOrDish) {
+    String dishCharacteristicQuestion = String.format(DISH_QUESTION, characteristicOrDish);
+
+    int dishCharacteristicAnswer = JOptionPane.showConfirmDialog(null,
+            dishCharacteristicQuestion,
+            CONFIRM_TITLE,
+            JOptionPane.YES_NO_OPTION);
+
+    return dishCharacteristicAnswer;
+  }
+
+  private Dish panelCreatesNewDish(Dish lastDish, List<String> chosenCharacteristics) {
     String newDishName = JOptionPane.showInputDialog(null,
             WHICH_DISH_MESSAGE,
             SURRENDER_TITLE,

@@ -38,8 +38,7 @@ public class InitGame {
     List<String> chosenCharacteristics = new ArrayList<>();
     List<String> notContainsCharacteristics = new ArrayList<>();
 
-    for (int i = 0; i < onlyDistinctCharacteristic.size(); i++) {
-      String characteristic = onlyDistinctCharacteristic.get(i);
+    for (String characteristic : onlyDistinctCharacteristic) {
       int dishCharacteristicAnswer = panelDishOrCharacteristicQuestion(characteristic);
 
       if (dishCharacteristicAnswer == YES_OPTION) {
@@ -57,14 +56,12 @@ public class InitGame {
 
         if (isDishAnswer == YES_OPTION) {
           GotIt();
-          filteredList.addAll(updatedDishList);
-          chooseOneCharacteristic(filteredList);
         } else {
           Dish dish = panelCreatesNewDish(lastDish, chosenCharacteristics);
           filteredList.add(dish);
-          filteredList.addAll(updatedDishList);
-          chooseOneCharacteristic(filteredList);
         }
+        filteredList.addAll(updatedDishList);
+        chooseOneCharacteristic(filteredList);
       }
     }
   }
